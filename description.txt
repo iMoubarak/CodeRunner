@@ -1,0 +1,5 @@
+Code runner est un paquet de compilation universel utilisable sous linux 
+permettant de compiler vos programme (c/c++/java/...) de manière automatique
+sans pour autant specifié l'extension lors de la creation d'un fichier,ce programme peut identifier de façon
+autonome le type de langage utilisé dans le fichier
+

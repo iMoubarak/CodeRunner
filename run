@@ -1,0 +1,53 @@
+declare -a include=("#include" "#includ" "#iclude")
+declare -a c=("<stdio.h>" "<stdio>" "<stdi.h>")
+declare -a cpp=("<iostream>" "<iostream.h>" "<isotream>" "<istream>")
+if [ $# -eq 1 -a -f $1 ] ;then 
+    let test=1
+    for((i=0;i<3;i++))
+    {
+        for((j=0;j<4;j++))
+        {
+            shebang=`grep ${include[$i]} $1 && grep ${cpp[$j]} $1`
+            if [ $? -eq 0 ] ;then
+                let test=0
+                break;
+            fi
+        }
+        if [ $test -eq 0 ] ;then
+            break
+        fi
+    }
+    if [ $test -eq 0 ] ;then
+        var="tmp.cpp"
+        touch /tmp/$var
+        cat $1 >> /tmp/$var
+        g++ /tmp/$var -o prog
+        rm /tmp/$var
+        ./prog
+    else
+        for((i=0;i<3;i++))
+        {
+            for((j=0;j<3;j++))
+            {
+                shebang=`grep ${include[$i]} $1 && grep ${c[$j]} $1`
+                if [ $? -eq 0 ] ;then
+                    let test=0
+                    break;
+                fi
+            }
+            if [ $test -eq 0 ] ;then
+                break
+            fi
+        }
+        if [ $test -eq 0 ] ;then
+            var="tmp.c"
+            touch /tmp/$var
+            cat $1 >> /tmp/$var
+            gcc /tmp/$var -o prog
+            rm /tmp/$var
+            ./prog
+        fi
+    fi
+else
+    echo "Error : $1 is not a file"
+fi

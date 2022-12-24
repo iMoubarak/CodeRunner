@@ -1,0 +1,5 @@
+#!/bin/bash
+src="$HOME/DBP/CodeRunner"
+var="/home/$(ls /home)/DBP/CodeRunner/run"
+rm /usr/local/bin/run
+cp $var /usr/local/bin 

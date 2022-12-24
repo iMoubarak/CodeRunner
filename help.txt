@@ -2,7 +2,6 @@ run est un compilateur universel
 Utilisation : run fichier
 
 les services proposer : 
-	run-update : permet de faire une mise à jour du script
-	Aide en ligne sur  :  <https://github.com/iMoubarak/run.git>
+	Aide en ligne sur  :  <https://github.com/iMoubarak/CodeRunner>
 
 	

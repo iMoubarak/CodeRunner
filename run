@@ -1,17 +1,35 @@
 declare -a include=("#include" "#includ" "#iclude")
 declare -a c=("<stdio.h>" "<stdio>" "<stdi.h>")
 declare -a cpp=("<iostream>" "<iostream.h>" "<isotream>" "<istream>")
-if [ $# -eq 1 ] ;then
-    if [ $1=='--help' ] ;then
-        cat help.txt
-    else
-        if [ $# -eq 1 -a -f $1 ] ;then
-            let test=1
+type=''
+declare -a lfic
+type_fichier()
+{
+    if [ -f $1 ] ;then
+        let test=1
+        for((i=0;i<3;i++))
+        {
+            for((j=0;j<4;j++))
+            {
+                shebang=`grep ${include[$i]} $1 && grep ${cpp[$j]} $1`
+                if [ $? -eq 0 ] ;then
+                    let test=0
+                    break;
+                fi
+            }
+            if [ $test -eq 0 ] ;then
+                break
+            fi
+        }
+        if [ $test -eq 0 ] ;then
+                type='cpp'
+                return 1
+        else
             for((i=0;i<3;i++))
             {
-                for((j=0;j<4;j++))
+                for((j=0;j<3;j++))
                 {
-                    shebang=`grep ${include[$i]} $1 && grep ${cpp[$j]} $1`
+                    shebang=`grep ${include[$i]} $1 && grep ${c[$j]} $1`
                     if [ $? -eq 0 ] ;then
                         let test=0
                         break;
@@ -22,41 +40,82 @@ if [ $# -eq 1 ] ;then
                 fi
             }
             if [ $test -eq 0 ] ;then
-                var="tmp.cpp"
-                touch /tmp/$var
-                cat $1 >> /tmp/$var
-                g++ /tmp/$var -o prog
-                rm /tmp/$var
-                ./prog
-            else
-                for((i=0;i<3;i++))
-                {
-                    for((j=0;j<3;j++))
-                    {
-                        shebang=`grep ${include[$i]} $1 && grep ${c[$j]} $1`
-                        if [ $? -eq 0 ] ;then
-                            let test=0
-                            break;
-                        fi
-                    }
-                    if [ $test -eq 0 ] ;then
-                        break
-                    fi
-                }
-                if [ $test -eq 0 ] ;then
-                    var="tmp.c"
-                    touch /tmp/$var
-                    cat $1 >> /tmp/$var
-                    gcc /tmp/$var -o prog
-                    rm /tmp/$var
-                    ./prog
-                fi
+                type='c'
+                return 2
             fi
-        else
-            echo "Erreur : $1 n'existe pas"
-            cat help.txt
         fi
+    else
+        echo "Erreur : langage non pris en charge"
+        return 0
     fi
+
+}
+conversion()
+{
+    if test $1=='cpp' ;then
+        for var in ${lfic[@]}
+        do
+            fic="$var.cpp"
+            touch /tmp/$fic
+            cat $var >> /tmp/$fic
+        done
+            
+    elif test $1=='c' ;then
+        for var in ${lfic[@]}
+        do
+            fic="$var.c"
+            touch /tmp/$fic
+            cat $var >> /tmp/$fic
+        done
+    fi
+}
+compilation()
+{
+    let chaine
+    if test $1=='cpp' ; then
+        for var in ${lfic[@]}
+        do
+            chaine+="/tmp/"$var".cpp "
+        done
+        g++ $chaine -o prog
+        rm $chaine
+        ./prog
+    elif test $1=='c' ; then 
+        for var in ${lfic[@]}
+        do
+            chaine+="/tmp/"$var".c "
+        done
+        gcc $chaine -o prog
+        rm $chaine
+        ./prog
+    fi
+}
+if [ $# -eq 1 ] ;then
+    lfic[0]=$1
+    type_fichier $1
+    conversion $type
+    compilation $type
 else
-    echo "Error : $1 is not a file"
+    rep=()
+    mtype=''
+    i=0
+    if [ $# -eq 2 ] ;then
+        if [ $1==--mod $1==-m] ;then
+            for var in *
+            do
+                if test -d $var ;then
+                    rep[$i]=$var"/"
+                    ((i++))
+                else
+                    if test $var=='main.c' ;then
+                        mtype='c'
+                    elif test $var=='main.cpp' ;then
+                        mtype='cpp'
+                    elif test $var=='main' ;then
+                        mtype="$(typeof_file $var)"
+                fi
+            done
+             
+        fi
+    fi 
 fi
